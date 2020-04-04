@@ -15,7 +15,7 @@ params = ln.engine.HyperParameters(
     # Dataset
     _train_set = 'train.h5',
     _test_set = 'test.h5',
-    _filter_anno = 'ignore',
+    _filter_anno = 'rm',
 
     # Data Augmentation
     _jitter = .3,
@@ -25,10 +25,12 @@ params = ln.engine.HyperParameters(
     _value = 1.5,
 )
 
+
 # Network
 def init_weights(m):
     if isinstance(m, torch.nn.Conv2d):
         torch.nn.init.kaiming_normal_(m.weight, nonlinearity='leaky_relu')
+
 
 params.network = ln.models.YoloV2(len(params.class_label_map))
 params.network.apply(init_weights)
@@ -39,6 +41,12 @@ params.loss = ln.network.loss.RegionLoss(
     params.network.anchors,
     params.network.stride,
 )
+
+# Test
+params.test = ln.data.transform.Compose([
+    ln.data.transform.GetBoundingBoxes(len(params.class_label_map), params.network.anchors, 0.5),
+    ln.data.transform.NonMaxSuppression(0.5),
+])
 
 # Postprocessing
 params._post = ln.data.transform.Compose([
@@ -67,7 +75,7 @@ step = torch.optim.lr_scheduler.MultiStepLR(
     gamma = .1,
 )
 params.scheduler = ln.engine.SchedulerCompositor(
-#   batch   scheduler
+# batch scheduler
     (0,     burn_in),
     (1000,  step),
 )

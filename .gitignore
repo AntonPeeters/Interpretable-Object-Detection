@@ -203,4 +203,6 @@ modules.xml
 yolo/weights/*
 !yolo/weights/download_weights.sh
 lightnet/weights/*
+lightnet/data/VOCdevkit/*
+
 
