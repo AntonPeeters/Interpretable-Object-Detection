@@ -200,9 +200,7 @@ modules.xml
 
 # End of https://www.gitignore.io/api/pycharm+all
 
-yolo/weights/*
-!yolo/weights/download_weights.sh
-lightnet/weights/*
-lightnet/data/VOCdevkit/*
+weights/*
+data/VOCdevkit/*
 
 
