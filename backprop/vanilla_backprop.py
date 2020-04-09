@@ -23,16 +23,18 @@ class VanillaBackprop():
     def hook_layers(self):
         def hook_function(module, grad_in, grad_out):
             self.gradients = grad_in[0]
+            print(grad_in[0].size())
+            print(grad_out[0].size())
 
         # Register hook to the first layer
         first_layer = list(self.model.features._modules.items())[0][1]
+        print(first_layer)
         first_layer.register_backward_hook(hook_function)
 
     def generate_gradients(self, input_image, target_class):
         # Forward
         model_output = self.model(input_image)
         index = model_output.data.numpy().argmax()
-        print(index)
         # Zero grads
         self.model.zero_grad()
         # Target for backprop
