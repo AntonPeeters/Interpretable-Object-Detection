@@ -45,7 +45,7 @@ def save_gradient_images(gradient, file_name):
     gradient /= gradient.max()
     # Save image
 
-    path_to_file = os.path.join('data/pandaou/', file_name + '.jpg')
+    path_to_file = os.path.join('data/results/', file_name + '.jpg')
     save_image(gradient, path_to_file)
 
 

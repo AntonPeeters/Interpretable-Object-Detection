@@ -38,6 +38,8 @@ def detect(params, annos, image, device, out_image):
     # Run network
     params.network.to(device)
     out = params.network(img_tf.to(device))
+
+    # Backpropagation
     backprop(params, img_tf, annos, device)
 
     # Postprocess

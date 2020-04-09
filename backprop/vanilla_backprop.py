@@ -23,8 +23,6 @@ class VanillaBackprop():
     def hook_layers(self):
         def hook_function(module, grad_in, grad_out):
             self.gradients = grad_in[0]
-            print(grad_in[0].size())
-            print(grad_out[0].size())
 
         # Register hook to the first layer
         first_layer = list(self.model.features._modules.items())[0][1]
