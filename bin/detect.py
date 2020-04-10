@@ -28,10 +28,12 @@ def identify(xml_file):
 
 
 def detect(params, annos, image, device, out_image):
+    letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Preprocess
     img = Image.open(image)
-    img_tf = ln.data.transform.Letterbox.apply(img, dimension=params.input_dimension)
+    img_tf = letterbox(img)
+    annos = letterbox(annos)
     img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
     img_tf.requires_grad = True
 
