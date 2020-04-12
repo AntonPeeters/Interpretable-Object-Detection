@@ -9,6 +9,7 @@ import brambox as bb
 import lightnet as ln
 from dataset import *
 from vanilla_backprop import *
+from gradcam import *
 import xml.etree.ElementTree as ET
 
 
@@ -34,15 +35,19 @@ def detect(params, annos, image, device, out_image):
     img = Image.open(image)
     img_tf = letterbox(img)
     annos = letterbox(annos)
+
     img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
     img_tf.requires_grad = True
 
     # Run network
-    params.network.to(device)
-    out = params.network(img_tf.to(device))
+    #params.network.to(device)
+    #out = params.network(img_tf.to(device))
 
     # Backpropagation
-    backprop(params, img_tf, annos, device)
+    out = backprop(params, img_tf, annos, device)
+
+    # Grad-CAM
+    gradcam(params, img_tf, annos, device)
 
     # Postprocess
     out = params.post(out)
@@ -90,17 +95,6 @@ if __name__ == '__main__':
     annos = bb.io.load('anno_pascalvoc', args.anno, identify)
 
     image = getImage(args.anno)
-
-    """# Dataloader
-    dataloader = torch.utils.data.DataLoader(
-        VOCDataset(os.path.join(args.anno, params.test_set), params, False),
-        batch_size=params.mini_batch_size,
-        shuffle=False,
-        drop_last=False,
-        num_workers=8,
-        pin_memory=True,
-        collate_fn=ln.data.brambox_collate,
-    )"""
 
     # Run detector
     detect(params, annos, image, device, args.output)
