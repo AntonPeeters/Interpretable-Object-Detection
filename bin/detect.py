@@ -8,7 +8,7 @@ from torchvision import transforms as tf
 import brambox as bb
 import lightnet as ln
 from dataset import *
-from vanilla_backprop import *
+from backprop import *
 from gradcam import *
 import xml.etree.ElementTree as ET
 
@@ -34,20 +34,21 @@ def detect(params, annos, image, device, out_image):
     # Preprocess
     img = Image.open(image)
     img_tf = letterbox(img)
+    original_image = img_tf
     annos = letterbox(annos)
 
     img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
     img_tf.requires_grad = True
 
     # Run network
-    #params.network.to(device)
-    #out = params.network(img_tf.to(device))
+    params.network.to(device)
+    out = params.network(img_tf.to(device))
 
     # Backpropagation
-    out = backprop(params, img_tf, annos, device)
+    backprop(params, img_tf, annos, device)
 
     # Grad-CAM
-    gradcam(params, img_tf, annos, device)
+    gradcam(params, img_tf, original_image, annos, device)
 
     # Postprocess
     out = params.post(out)

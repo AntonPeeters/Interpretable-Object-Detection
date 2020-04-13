@@ -27,9 +27,7 @@ class CamExtractor():
             Does a forward pass on convolutions, hooks the function at given layer
         """
         conv_output = None
-        print(self.model.features._modules.items())
         for module_pos, module in self.model.features._modules.items():
-            print(module)
             x = module(x)  # Forward
             if int(module_pos) == self.target_layer:
                 x.register_hook(self.save_gradient)
@@ -108,6 +106,7 @@ if __name__ == '__main__':
     (original_image, prep_img, target_class, file_name_to_export, pretrained_model) =\
         get_example_params(target_example)
     # Grad cam
+    print(original_image.size)
     grad_cam = GradCam(pretrained_model, target_layer=11)
     # Generate cam mask
     cam = grad_cam.generate_cam(prep_img, target_class)

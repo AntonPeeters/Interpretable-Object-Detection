@@ -32,7 +32,6 @@ class VanillaBackprop():
     def generate_gradients(self, input_image, target_class):
         # Forward
         model_output = self.model(input_image)
-        index = model_output.data.numpy().argmax()
         # Zero grads
         self.model.zero_grad()
         # Target for backprop

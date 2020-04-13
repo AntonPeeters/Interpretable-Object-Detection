@@ -109,6 +109,9 @@ class VanillaBackprop:
             one_hot_output[0, anchor_max_idx, cls_index, grid_y, grid_x] = 1
             out[~one_hot_output.bool()] = 0
 
+            # Zero grads
+            self.model.zero_grad()
+
             # Backward pass
             out.backward(retain_graph=True, gradient=one_hot_output)
 
@@ -125,15 +128,10 @@ class VanillaBackprop:
             # Save grayscale gradients
             save_gradient_images(grayscale_vanilla_grads, entry.class_label + '_' + str(idx) + '_gray')
 
-        return output
-
 
 def backprop(params, img_tf, annos, device):
     # Vanilla backprop
     VBP = VanillaBackprop(params, device)
     # Generate gradients
-    det_output = VBP.generate_gradients(params, img_tf, annos, device)
+    VBP.generate_gradients(params, img_tf, annos, device)
     print('Vanilla backprop completed')
-    return det_output
-
-

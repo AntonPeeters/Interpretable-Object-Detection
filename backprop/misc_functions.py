@@ -92,6 +92,7 @@ def apply_colormap_on_image(org_im, activation, colormap_name):
     no_trans_heatmap = Image.fromarray((no_trans_heatmap*255).astype(np.uint8))
 
     # Apply heatmap on iamge
+    print(org_im.size)
     heatmap_on_image = Image.new("RGBA", org_im.size)
     heatmap_on_image = Image.alpha_composite(heatmap_on_image, org_im.convert('RGBA'))
     heatmap_on_image = Image.alpha_composite(heatmap_on_image, heatmap)
