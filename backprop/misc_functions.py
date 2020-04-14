@@ -92,7 +92,6 @@ def apply_colormap_on_image(org_im, activation, colormap_name):
     no_trans_heatmap = Image.fromarray((no_trans_heatmap*255).astype(np.uint8))
 
     # Apply heatmap on iamge
-    print(org_im.size)
     heatmap_on_image = Image.new("RGBA", org_im.size)
     heatmap_on_image = Image.alpha_composite(heatmap_on_image, org_im.convert('RGBA'))
     heatmap_on_image = Image.alpha_composite(heatmap_on_image, heatmap)
@@ -235,7 +234,7 @@ def get_example_params(example_index):
     # Process image
     prep_img = preprocess_image(original_image)
     # Define model
-    pretrained_model = models.alexnet(pretrained=True)
+    pretrained_model = models.vgg16(pretrained=True)
     return (original_image,
             prep_img,
             target_class,

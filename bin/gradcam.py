@@ -60,7 +60,7 @@ class GradCam:
     def generate_cam(self, params, img_tf, original_image, annos, device):
         # Full forward pass
         # conv_output is the output of convolutions at specified layer
-        # model_output is the final output of the model (1, 1000)
+        # model_output is the final output of the model (1, 125, 13, 13)
         conv_output, model_output = self.extractor.forward_pass(img_tf.to(device))
 
         # Tensor
@@ -128,8 +128,8 @@ class GradCam:
             # If there is a more beautiful way, do not hesitate to send a PR.
 
             # You can also use the code below instead of the code line above, suggested by @ ptschandl
-
             cam = zoom(cam, np.array(img_tf[0].shape[1:])/np.array(cam.shape))
+
             save_class_activation_images(original_image, cam, entry.class_label + '_' + str(idx))
 
 
