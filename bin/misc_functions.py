@@ -45,7 +45,7 @@ def save_gradient_images(gradient, file_name):
     gradient /= gradient.max()
     # Save image
 
-    path_to_file = os.path.join('data/results', file_name + '.jpg')
+    path_to_file = os.path.join('data/results/back', file_name + '.jpg')
     save_image(gradient, path_to_file)
 
 
@@ -61,13 +61,13 @@ def save_class_activation_images(org_img, activation_map, file_name):
     # Grayscale activation map
     heatmap, heatmap_on_image = apply_colormap_on_image(org_img, activation_map, 'hsv')
     # Save colored heatmap
-    path_to_file = os.path.join('data/results', file_name+'_Cam_Heatmap.png')
+    path_to_file = os.path.join('data/results/cam', 'cam_Heatmap_' + file_name+'.png')
     save_image(heatmap, path_to_file)
     # Save heatmap on iamge
-    path_to_file = os.path.join('data/results', file_name+'_Cam_On_Image.png')
+    path_to_file = os.path.join('data/results/cam', 'cam_OnImage_' + file_name+'.png')
     save_image(heatmap_on_image, path_to_file)
     # SAve grayscale heatmap
-    path_to_file = os.path.join('data/results', file_name+'_Cam_Grayscale.png')
+    path_to_file = os.path.join('data/results/cam', 'cam_Grayscale_' + file_name+'.png')
     save_image(activation_map, path_to_file)
 
 

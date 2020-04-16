@@ -13,7 +13,7 @@ class VanillaBackprop:
     def __init__(self, params, device):
         self.model = params.network.to(device)
         self.gradients = None
-
+        self.model.eval()
         # Hook the first layer to get the gradient
         self.hook_layers()
 

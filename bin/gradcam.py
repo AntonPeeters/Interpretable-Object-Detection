@@ -54,6 +54,7 @@ class GradCam:
     """
     def __init__(self, params, device, target_layer):
         self.model = params.network.to(device)
+        self.model.eval()
         # Define extractor
         self.extractor = CamExtractor(self.model, target_layer)
 

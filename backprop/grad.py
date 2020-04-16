@@ -20,7 +20,6 @@ class FeatureExtractor():
     def __call__(self, x):
         outputs = []
         self.gradients = []
-        print(self.model._modules.items())
         for name, module in self.model._modules.items():
             x = module(x)
             if name in self.target_layers:

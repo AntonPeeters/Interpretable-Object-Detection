@@ -49,6 +49,7 @@ def detect(params, annos, image, device, out_image):
     backprop(params, img_tf, annos, device)
 
     # Grad-CAM
+    gradcam(params, img_tf, original_image, annos, device)
     gradcam2(params, img_tf, original_image, annos, device)
 
     # Postprocess

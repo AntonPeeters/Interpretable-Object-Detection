@@ -65,12 +65,12 @@ def preprocess_image(img):
     return input
 
 
-def show_cam_on_image(img, mask):
+def show_cam_on_image(img, mask, file_name):
     heatmap = cv2.applyColorMap(np.uint8(255 * mask), cv2.COLORMAP_JET)
     heatmap = np.float32(heatmap) / 255
     cam = heatmap + np.float32(img)
     cam = cam / np.max(cam)
-    cv2.imwrite("data/results/cam.jpg", np.uint8(255 * cam))
+    cv2.imwrite("data/results/cam2/" + file_name + ".jpg", np.uint8(255 * cam))
 
 
 class GradCam:
@@ -116,14 +116,13 @@ class GradCam:
             out[:, :, 4, :, :].sigmoid()
 
             # Compute gradient
-            one_hot = np.zeros_like(out.cpu().detach(), dtype=np.float32)
+            one_hot = np.zeros_like(out.clone().cpu().detach(), dtype=np.float32)
             one_hot[0, :, 0, grid_y, grid_x] = 1
             one_hot[0, :, cls_index, grid_y, grid_x] = 1
-            print(one_hot.shape, out.size())
-            out[~one_hot.astype(bool)] = 0
+            out[0][~one_hot.astype(bool)] = 0
 
             one_hot = torch.from_numpy(one_hot).requires_grad_(True)
-            one_hot = torch.sum(one_hot.cuda() * output)
+            one_hot = torch.sum(one_hot.cuda() * out)
 
             # Zero grads
             self.model.zero_grad()
@@ -142,11 +141,11 @@ class GradCam:
                 cam += w * target[i, :, :]
 
             cam = np.maximum(cam, 0)
-            cam = cv2.resize(cam, (224, 224))
+            cam = cv2.resize(cam, (416, 416))
             cam = cam - np.min(cam)
             cam = cam / np.max(cam)
 
-            show_cam_on_image(original_image, cam)
+            show_cam_on_image(original_image, cam, entry.class_label + '_' + str(idx))
 
 
 class GuidedBackpropReLU(Function):
@@ -247,6 +246,7 @@ def gradcam2(params, img_tf, original_image, annos, device):
     grad_cam = GradCam(params.network.to(device), target_layer_names=["17_convbatch"])
 
     grad_cam(params, img_tf, annos, original_image)
+    print('Grad cam 2 completed')
 
     """gb_model = GuidedBackpropReLUModel(model=models.vgg19(pretrained=True))
     gb = gb_model(img_tf, index=annos)
