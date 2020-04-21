@@ -112,8 +112,8 @@ class GradCam:
             # Reform output
             out = output.clone()
             out = out.view(batch, num_anchors, -1, height, width)
-            out = out[:, :, 5:, :, :]
-            out[:, :, 4, :, :].sigmoid()
+            out = out[:, :, 4:, :, :]
+            #out[:, :, 4, :, :].sigmoid_()
 
             # Compute gradient
             one_hot = np.zeros_like(out.clone().cpu().detach(), dtype=np.float32)

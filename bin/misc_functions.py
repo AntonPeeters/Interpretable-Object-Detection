@@ -24,29 +24,37 @@ def convert_to_grayscale(im_as_arr):
     returns:
         grayscale_im (numpy_arr): Grayscale image with shape (1,W,D)
     """
-    grayscale_im = np.sum(np.abs(im_as_arr), axis=0)
+    grayscale_im = np.sum(np.abs(im_as_arr), axis=1)
+    """grayscale_im = np.sum(np.abs(im_as_arr), axis=1)
     im_max = np.percentile(grayscale_im, 99)
     im_min = np.min(grayscale_im)
     grayscale_im = (np.clip((grayscale_im - im_min) / (im_max - im_min), 0, 1))
-    grayscale_im = np.expand_dims(grayscale_im, axis=0)
+    grayscale_im = np.expand_dims(grayscale_im, axis=1)"""
     return grayscale_im
 
 
-def save_gradient_images(gradient, file_name):
+def save_gradient_images(gradient_images, file_name):
     """
         Exports the original gradient image
 
     Args:
-        gradient (np arr): Numpy array of the gradient with shape (3, 224, 224)
+        gradient_images (np arr): Numpy arrays of the gradients with shape (3, 224, 224)
         file_name (str): File name to be exported
     """
-    # Normalize
-    gradient = gradient - gradient.min()
-    gradient /= gradient.max()
-    # Save image
+    np.save("data/results/raw/" + file_name, gradient_images)
+    i = 0
+    print("max:", np.array(gradient_images).max(), ", min:", np.array(gradient_images).min())
+    all_grad = gradient_images - np.array(gradient_images).min()
+    for gradient in gradient_images:
+        # Normalize
+        gradient = gradient - np.array(gradient_images).min()
+        gradient /= np.array(all_grad).max()
+        print(gradient.max(), gradient.min())
 
-    path_to_file = os.path.join('data/results/back', file_name + '.jpg')
-    save_image(gradient, path_to_file)
+        # Save image
+        path_to_file = os.path.join('data/results/back', str(i) + file_name + '.jpg')
+        save_image(gradient, path_to_file)
+        i += 1
 
 
 def save_class_activation_images(org_img, activation_map, file_name):

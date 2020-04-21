@@ -26,7 +26,6 @@ class VanillaBackprop():
 
         # Register hook to the first layer
         first_layer = list(self.model.features._modules.items())[0][1]
-        print(first_layer)
         first_layer.register_backward_hook(hook_function)
 
     def generate_gradients(self, input_image, target_class):

@@ -91,8 +91,8 @@ class GradCam:
             out = model_output.clone()
             conv_out = conv_output.clone()
             out = out.view(batch, num_anchors, -1, height, width)
-            out = out[:, :, 5:, :, :]
-            out[:, :, 4, :, :].sigmoid()
+            out = out[:, :, 4:, :, :]
+            #out[:, :, 4, :, :].sigmoid_()
 
             # Compute gradient
             one_hot_output = torch.zeros_like(out)
