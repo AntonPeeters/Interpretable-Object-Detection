@@ -50,7 +50,7 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, class_flag=True, box_flag=False):
+    def generate_gradients(self, params, img_tf, annos, device, class_flag=True, box_flag=True):
         output = self.model(img_tf.to(device))
 
         # Tensor
