@@ -49,7 +49,7 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, class_flag=True, box_flag=True, anchor_flag=True):
+    def generate_gradients(self, params, img_tf, annos, device, class_flag=True, box_flag=True, anchor_flag=False):
         output = self.model(img_tf.to(device))
 
         # Tensor
@@ -108,10 +108,11 @@ class VanillaBackprop:
             grid_y = int(center_y * height / img_tf.size(3))
 
             # Compute best anchor
-            cls_scores = torch.nn.functional.softmax(network_output[:, :, cls_index, grid_x + height * grid_y], 1)
+            cls_scores = torch.nn.functional.softmax(network_output[:, :, cls_index, grid_x + grid_y * height], 1)
+            cls_scores.mul_(network_output[:, :, 4, grid_x + grid_y * height])
+            print(cls_scores.data)
+            iets, anchor_max_idx = torch.max(cls_scores, 1)
             if anchor_flag:
-                _, anchor_max_idx = torch.max(cls_scores, 1)
-            else:
                 anchor_max_idx = best_anchors[idx]
             print(best_anchors[idx].item(), anchor_max_idx.item())
 

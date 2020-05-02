@@ -202,5 +202,5 @@ modules.xml
 
 weights/*
 data/VOCdevkit/*
-
-
+data/results/raw/*
+.ipynb_checkpoints/*

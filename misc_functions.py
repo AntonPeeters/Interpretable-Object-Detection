@@ -51,7 +51,6 @@ def save_color_images(gradient_images, file_name, threshold=99.999):
         threshold: The threshold for outliers
         file_name (str): File name to be exported
     """
-    np.save("data/results/raw/" + file_name, gradient_images)
     i = 0
     print("max:", np.array(gradient_images).max(), ", min:", np.array(gradient_images).min())
     all_grad = np.array(gradient_images)
