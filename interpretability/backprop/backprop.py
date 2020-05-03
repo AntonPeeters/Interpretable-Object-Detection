@@ -5,7 +5,9 @@ Created on Thu Oct 26 11:19:58 2017
 """
 import torch
 
-from misc_functions import *
+from utils import misc_functions
+
+__all__ = ['backpropagation', 'VanillaBackprop']
 
 
 def bbox_wh_ious(boxes1, boxes2):
@@ -158,11 +160,11 @@ class VanillaBackprop:
             gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
 
-        torch.save(gradients_as_ten, "data/results/raw/tensor" + annos.image[0].split('/')[-1] + ".pt")
+        torch.save(gradients_as_ten, "../../data/results/raw/tensor" + annos.image[0].split('/')[-1] + ".pt")
         return gradients_as_arr
 
 
-def backprop(params, img_tf, annos, device):
+def backpropagation(params, img_tf, annos, device):
     # Vanilla backprop
     VBP = VanillaBackprop(params, device)
     # Generate gradients

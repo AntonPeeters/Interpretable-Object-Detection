@@ -5,6 +5,7 @@ import torch
 from torch.autograd import Function
 from torchvision import models
 
+
 class FeatureExtractor():
     """ Class for extracting activations and 
     registering gradients from targetted intermediate layers """

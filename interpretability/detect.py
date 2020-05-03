@@ -9,8 +9,7 @@ import brambox as bb
 import lightnet as ln
 from dataset import *
 from backprop import *
-from gradcam import *
-from grad import *
+from gradcam import gradcam, grad
 import xml.etree.ElementTree as ET
 
 
@@ -46,7 +45,7 @@ def detect(params, annos, image, device, out_image):
     out = params.network(img_tf.to(device))
 
     # Backpropagation
-    backprop(params, img_tf, annos, device)
+    backpropagation(params, img_tf, annos, device)
 
     # Grad-CAM
     #gradcam(params, img_tf, original_image, annos, device)

@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from scipy.ndimage.interpolation import zoom
 
-from misc_functions import save_class_activation_images
+from utils import misc_functions
 
 
 class CamExtractor:
