@@ -9,60 +9,45 @@ import numpy as np
 from PIL import Image
 import matplotlib.cm as mpl_color_map
 
-import torch
-from torch.autograd import Variable
-from torchvision import models
+__all__ = ['normalize', 'save_images', 'save_image', 'show_image']
 
 
-def save_grayscale_images(gradient_images, file_name, threshold=99.999):
+def normalize(gradient_images, grayscale_flag=False, threshold=99.999):
     """
-        Exports the original gradient images to grayscale
+            Exports the original gradient images
 
-    Args:
-        gradient_images (np arr): Numpy arrays of the gradients with shape (3, 416, 416)
-        threshold: The threshold for outliers
-        file_name (str): File name to be exported
-    """
-    i = 0
-    grayscale_im = np.sum(np.abs(gradient_images), axis=1)
-    print("max:", np.array(grayscale_im).max(), ", min:", np.array(grayscale_im).min())
-    all_grad = np.array(grayscale_im)
-    grad_min = all_grad.min()
-    grad_max = np.percentile(all_grad, threshold) - grad_min
-    for gradient in grayscale_im:
-        # Normalize
-        gradient = gradient - grad_min
-        gradient /= grad_max
-        gradient = np.clip(gradient, 0, 1)
-        print(gradient.max(), gradient.min())
-
-        # Save image
-        path_to_file = os.path.join('data/results/back', str(i) + file_name + '.jpg')
-        save_image(gradient, path_to_file)
-        i += 1
-
-
-def save_color_images(gradient_images, file_name, threshold=99.999):
-    """
-        Exports the original gradient images
-
-    Args:
-        gradient_images (np arr): Numpy arrays of the gradients with shape (3, 416, 416)
-        threshold: The threshold for outliers
-        file_name (str): File name to be exported
-    """
-    i = 0
+        Args:
+            gradient_images (np arr): Numpy arrays of the gradients with shape (3, 416, 416)
+            grayscale_flag: flag to convert gradients to grayscale
+            threshold: Threshold for removing outliers
+        """
     print("max:", np.array(gradient_images).max(), ", min:", np.array(gradient_images).min())
+    if grayscale_flag:
+        gradient_images = np.sum(np.abs(gradient_images), axis=1)
     all_grad = np.array(gradient_images)
     grad_min = all_grad.min()
     grad_max = np.percentile(all_grad, threshold) - grad_min
+    gradient_images_list = []
     for gradient in gradient_images:
         # Normalize
         gradient = gradient - grad_min
         gradient /= grad_max
         gradient = np.clip(gradient, 0, 1)
+        gradient_images_list.append(gradient)
         print(gradient.max(), gradient.min())
+    return gradient_images_list
 
+
+def save_images(gradient_images, file_name):
+    """
+        Exports the original gradient images
+
+    Args:
+        gradient_images (np arr): List of numpy arrays of the gradients with shape (3, 416, 416)
+        file_name (str): File name to be exported
+    """
+    i = 0
+    for gradient in gradient_images:
         # Save image
         path_to_file = os.path.join('data/results/back', str(i) + file_name + '.jpg')
         save_image(gradient, path_to_file)
@@ -146,13 +131,25 @@ def save_image(im, path):
     """
         Saves a numpy matrix or PIL image as an image
     Args:
-        im_as_arr (Numpy array): Matrix of shape DxWxH
+        im (Numpy array): Matrix of shape DxWxH
         path (str): Path to the image
     """
     if isinstance(im, (np.ndarray, np.generic)):
         im = format_np_output(im)
         im = Image.fromarray(im)
     im.save(path)
+
+
+def show_image(im):
+    """
+        Returns a numpy matrix or PIL image
+    Args:
+        im (Numpy array): Matrix of shape DxWxH
+    """
+    if isinstance(im, (np.ndarray, np.generic)):
+        im = format_np_output(im)
+        im = Image.fromarray(im)
+    return im
 
 
 def recreate_image(im_as_var):

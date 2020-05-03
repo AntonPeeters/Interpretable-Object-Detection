@@ -5,7 +5,7 @@ Created on Thu Oct 26 11:19:58 2017
 """
 import torch
 
-from misc_functions import save_color_images, save_grayscale_images
+from misc_functions import *
 
 
 def bbox_wh_ious(boxes1, boxes2):
@@ -49,7 +49,8 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, class_flag=True, box_flag=True, anchor_flag=False):
+    def generate_gradients(self, params, img_tf, annos, device, threshold=1.0, class_flag=True, box_flag=True):
+        # Run model
         output = self.model(img_tf.to(device))
 
         # Tensor
@@ -92,7 +93,7 @@ class VanillaBackprop:
 
         # Find best anchor for each gt
         iou_gt_anchors = bbox_wh_ious(gt, anchors_new)
-        _, best_anchors = iou_gt_anchors.max(1)
+        value2, best_anchors = iou_gt_anchors.max(1)
 
         gradients_as_arr = []
         gradients_as_ten = []
@@ -108,13 +109,14 @@ class VanillaBackprop:
             grid_y = int(center_y * height / img_tf.size(3))
 
             # Compute best anchor
-            cls_scores = torch.nn.functional.softmax(network_output[:, :, cls_index, grid_x + grid_y * height], 1)
+            cls_scores = torch.nn.functional.softmax(network_output[:, :, 5 + cls_index, grid_x + grid_y * height], 1)
             cls_scores.mul_(network_output[:, :, 4, grid_x + grid_y * height])
-            print(cls_scores.data)
-            iets, anchor_max_idx = torch.max(cls_scores, 1)
-            if anchor_flag:
+            value, anchor_max_idx = torch.max(cls_scores, 1)
+            print(anchor_max_idx.item(), best_anchors[idx].item())
+            if value < threshold:
                 anchor_max_idx = best_anchors[idx]
-            print(best_anchors[idx].item(), anchor_max_idx.item())
+
+            print(anchor_max_idx)
 
             # Reform output
             out = output.clone()
@@ -137,12 +139,12 @@ class VanillaBackprop:
                 out[~one_hot_output.bool()] = 0
 
             # Box and class
-            if box_flag is True and class_flag is True:
+            else:
                 out = out[:, :, 4:, :, :]
                 # Compute gradient
                 one_hot_output = torch.zeros_like(out)
                 one_hot_output[0, anchor_max_idx, 0, grid_y, grid_x] = 1
-                one_hot_output[0, anchor_max_idx, cls_index + 1, grid_y, grid_x] = 1
+                one_hot_output[0, anchor_max_idx, 1 + cls_index, grid_y, grid_x] = 1
                 out[~one_hot_output.bool()] = 0
 
             # Zero grads
@@ -152,7 +154,7 @@ class VanillaBackprop:
             out.backward(retain_graph=True, gradient=one_hot_output)
 
             # Convert Pytorch variable to numpy array
-            # [0] to get rid of the first channel (1,3,224,224)
+            # [0] to get rid of the first channel (1,3,416,416)
             gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
 
@@ -166,9 +168,15 @@ def backprop(params, img_tf, annos, device):
     # Generate gradients
     gradients_as_arr = VBP.generate_gradients(params, img_tf, annos, device)
 
+    # Normalize
+    gradients_list = normalize(gradients_as_arr)
+
     # Save colored gradients
-    save_color_images(gradients_as_arr, '_color')
+    save_images(gradients_list, '_color')
+
+    # Normalize to grayscale
+    gradients_list = normalize(gradients_as_arr, True)
 
     # Save grayscale gradients
-    save_grayscale_images(gradients_as_arr, '_gray')
+    save_images(gradients_list, '_gray')
     print('Vanilla backprop completed')
