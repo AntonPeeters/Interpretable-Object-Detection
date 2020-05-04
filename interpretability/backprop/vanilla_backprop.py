@@ -5,7 +5,7 @@ Created on Thu Oct 26 11:19:58 2017
 """
 import torch
 
-from utils import misc_functions
+from interpretability.utils.misc_functions import save_images, normalize
 
 __all__ = ['backpropagation', 'VanillaBackprop']
 
@@ -51,7 +51,7 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, threshold=1.0, class_flag=True, box_flag=True):
+    def generate_gradients(self, params, img_tf, annos, device, threshold=0.0, class_flag=True, box_flag=True):
         # Run model
         output = self.model(img_tf.to(device))
 
@@ -95,7 +95,7 @@ class VanillaBackprop:
 
         # Find best anchor for each gt
         iou_gt_anchors = bbox_wh_ious(gt, anchors_new)
-        value2, best_anchors = iou_gt_anchors.max(1)
+        _, best_anchors = iou_gt_anchors.max(1)
 
         gradients_as_arr = []
         gradients_as_ten = []
@@ -160,7 +160,7 @@ class VanillaBackprop:
             gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
 
-        torch.save(gradients_as_ten, "../../data/results/raw/tensor" + annos.image[0].split('/')[-1] + ".pt")
+        #torch.save(gradients_as_ten, "data/results/raw/tensor" + annos.image[0].split('/')[-1] + ".pt")
         return gradients_as_arr
 
 

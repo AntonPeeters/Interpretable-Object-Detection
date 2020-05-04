@@ -49,7 +49,7 @@ def save_images(gradient_images, file_name):
     i = 0
     for gradient in gradient_images:
         # Save image
-        path_to_file = os.path.join('../../data/results/back', str(i) + file_name + '.jpg')
+        path_to_file = os.path.join('data/results/back', str(i) + file_name + '.jpg')
         save_image(gradient, path_to_file)
         i += 1
 

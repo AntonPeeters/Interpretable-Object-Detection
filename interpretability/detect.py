@@ -2,13 +2,11 @@
 import os
 import argparse
 from PIL import Image
-import pandas as pd
 import torch
 from torchvision import transforms as tf
 import brambox as bb
 import lightnet as ln
-from dataset import *
-from backprop import *
+from backprop.backprop import backpropagation
 from gradcam import gradcam, grad
 import xml.etree.ElementTree as ET
 
@@ -28,11 +26,11 @@ def identify(xml_file):
     return f'{folder}/JPEGImages/{filename}'
 
 
-def detect(params, annos, image, device, out_image):
+def detect(params, annos, args_anno, device, out_image):
     letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Preprocess
-    img = Image.open(image)
+    img = Image.open(getImage(args_anno))
     img_tf = letterbox(img)
     original_image = img_tf
     annos = letterbox(annos)
@@ -63,6 +61,23 @@ def detect(params, annos, image, device, out_image):
         img.save(out_image)
     else:
         img.show()
+
+
+def detect_new(params, annos, args_anno, device):
+    letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
+
+    # Preprocess
+    img = Image.open(getImage(args_anno))
+    img_tf = letterbox(img)
+    annos = letterbox(annos)
+
+    img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
+    img_tf.requires_grad = True
+
+    # Run network
+    params.network.to(device)
+
+    return params, img_tf, annos
     
     
 if __name__ == '__main__':
@@ -96,7 +111,5 @@ if __name__ == '__main__':
 
     annos = bb.io.load('anno_pascalvoc', args.anno, identify)
 
-    image = getImage(args.anno)
-
     # Run detector
-    detect(params, annos, image, device, args.output)
+    detect(params, annos, args.anno, device, args.output)
