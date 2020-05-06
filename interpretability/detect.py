@@ -6,7 +6,7 @@ import torch
 from torchvision import transforms as tf
 import brambox as bb
 import lightnet as ln
-from backprop.backprop import backpropagation
+from backprop.vanilla_backprop import backpropagation
 from gradcam import gradcam, grad
 import xml.etree.ElementTree as ET
 
@@ -61,23 +61,6 @@ def detect(params, annos, args_anno, device, out_image):
         img.save(out_image)
     else:
         img.show()
-
-
-def detect_new(params, annos, args_anno, device):
-    letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
-
-    # Preprocess
-    img = Image.open(getImage(args_anno))
-    img_tf = letterbox(img)
-    annos = letterbox(annos)
-
-    img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
-    img_tf.requires_grad = True
-
-    # Run network
-    params.network.to(device)
-
-    return params, img_tf, annos
     
     
 if __name__ == '__main__':

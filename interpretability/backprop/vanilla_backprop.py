@@ -7,7 +7,7 @@ import torch
 
 from interpretability.utils.misc_functions import save_images, normalize
 
-__all__ = ['backpropagation', 'VanillaBackprop']
+__all__ = ['VanillaBackprop']
 
 
 def bbox_wh_ious(boxes1, boxes2):
@@ -51,7 +51,7 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, threshold=0.0, class_flag=True, box_flag=True):
+    def generate_gradients(self, params, img_tf, annos, device, threshold=1.0, class_flag=True, box_flag=True):
         # Run model
         output = self.model(img_tf.to(device))
 
@@ -114,11 +114,11 @@ class VanillaBackprop:
             cls_scores = torch.nn.functional.softmax(network_output[:, :, 5 + cls_index, grid_x + grid_y * height], 1)
             cls_scores.mul_(network_output[:, :, 4, grid_x + grid_y * height])
             value, anchor_max_idx = torch.max(cls_scores, 1)
-            print(anchor_max_idx.item(), best_anchors[idx].item())
+            print("Uit annos:", anchor_max_idx.item(), ", Berekend:", best_anchors[idx].item())
             if value < threshold:
                 anchor_max_idx = best_anchors[idx]
 
-            print(anchor_max_idx)
+            print("Gekozen:", anchor_max_idx.item())
 
             # Reform output
             out = output.clone()
