@@ -133,7 +133,7 @@ class VanillaBackprop:
                 out[~one_hot_output.bool()] = 0
 
             # Class only
-            if box_flag is False and class_flag is True:
+            elif box_flag is False and class_flag is True:
                 out = out[:, :, 5:, :, :]
                 # Compute gradient
                 one_hot_output = torch.zeros_like(out)
