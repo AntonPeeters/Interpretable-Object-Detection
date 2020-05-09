@@ -6,7 +6,7 @@ import torch
 from torchvision import transforms as tf
 import brambox as bb
 import lightnet as ln
-from backprop.vanilla_backprop import backpropagation
+from backprop.vanilla_backprop_old import backpropagation
 from gradcam import gradcam, grad
 import xml.etree.ElementTree as ET
 

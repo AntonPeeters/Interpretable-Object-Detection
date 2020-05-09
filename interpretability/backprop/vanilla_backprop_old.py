@@ -5,6 +5,8 @@ Created on Thu Oct 26 11:19:58 2017
 """
 import torch
 
+from utils.misc_functions import save_images, normalize
+
 __all__ = ['VanillaBackprop']
 
 
@@ -158,4 +160,25 @@ class VanillaBackprop:
             gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
 
+        #torch.save(gradients_as_ten, "data/results/raw/tensor" + annos.image[0].split('/')[-1] + ".pt")
         return gradients_as_arr
+
+
+def backpropagation(params, img_tf, annos, device):
+    # Vanilla backprop
+    VBP = VanillaBackprop(params, device)
+    # Generate gradients
+    gradients_as_arr = VBP.generate_gradients(params, img_tf, annos, device)
+
+    # Normalize
+    gradients_list = normalize(gradients_as_arr)
+
+    # Save colored gradients
+    save_images(gradients_list, '_color')
+
+    # Normalize to grayscale
+    gradients_list = normalize(gradients_as_arr, True)
+
+    # Save grayscale gradients
+    save_images(gradients_list, '_gray')
+    print('Vanilla backprop completed')
