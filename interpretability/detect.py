@@ -30,10 +30,13 @@ def detect(params, annos, args_anno, device, out_image):
     letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Preprocess
+    print(getImage(args_anno))
     img = Image.open(getImage(args_anno))
     img_tf = letterbox(img)
     original_image = img_tf
     annos = letterbox(annos)
+
+    img.save('data/iets.jpg')
 
     img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
     img_tf.requires_grad = True
@@ -43,6 +46,7 @@ def detect(params, annos, args_anno, device, out_image):
     out = params.network(img_tf.to(device))
 
     # Backpropagation
+
     backpropagation(params, img_tf, annos, device)
 
     # Grad-CAM

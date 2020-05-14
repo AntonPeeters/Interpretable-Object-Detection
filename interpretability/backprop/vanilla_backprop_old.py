@@ -161,6 +161,7 @@ class VanillaBackprop:
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
 
         #torch.save(gradients_as_ten, "data/results/raw/tensor" + annos.image[0].split('/')[-1] + ".pt")
+        print(gradients_as_arr[0][:, 0, 0])
         return gradients_as_arr
 
 
@@ -171,10 +172,10 @@ def backpropagation(params, img_tf, annos, device):
     gradients_as_arr = VBP.generate_gradients(params, img_tf, annos, device)
 
     # Normalize
-    gradients_list = normalize(gradients_as_arr)
+    #gradients_list = normalize(gradients_as_arr)
 
     # Save colored gradients
-    save_images(gradients_list, '_color')
+    #save_images(gradients_list, '_color')
 
     # Normalize to grayscale
     gradients_list = normalize(gradients_as_arr, True)

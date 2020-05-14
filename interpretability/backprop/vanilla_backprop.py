@@ -157,5 +157,6 @@ class VanillaBackprop:
             # [0] to get rid of the first channel (1,3,416,416)
             gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
+            print(gradients_as_arr[0][:, 0, 0])
 
         return gradients_as_arr
