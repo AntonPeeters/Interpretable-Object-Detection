@@ -49,7 +49,7 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, threshold=1.0, class_flag=True, box_flag=True):
+    def generate_gradients(self, params, img_tf, annos, device, threshold=1.0, detections=None, class_flag=True, box_flag=True):
         # Run model
         output = self.model(img_tf.to(device))
 
@@ -98,7 +98,10 @@ class VanillaBackprop:
         gradients_as_arr = []
         gradients_as_ten = []
 
-        for idx, entry in annos.iterrows():
+        if detections is None:
+            detections = annos
+
+        for idx, entry in detections.iterrows():
             # Variable
             cls_index = params.class_label_map.index(entry.class_label)
 

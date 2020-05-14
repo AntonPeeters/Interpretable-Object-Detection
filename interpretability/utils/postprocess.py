@@ -86,19 +86,15 @@ class GetBoundingBoxesAnchor(ln.data.transform.util.BaseTransform):
             return torch.tensor([]).to(device)
 
         # Mask select boxes > conf_thresh
-        print(new_network_output.shape)
         coords = new_network_output.transpose(2, 3)[..., 0:4]
-        print(coords.shape)
         coords = coords[score_thresh[..., None].expand_as(coords)].view(-1, 4)
-        print(coords.shape)
+        print(coords.data)
         scores = cls_max[score_thresh]
         idx = cls_max_idx[score_thresh]
 
-        print(new_network_output.shape)
         anchors = new_network_output.transpose(2, 3)[..., -1]  # [C, AnchorIdx]
-        print(anchors[0, :, 0, :])
-        anchors = anchors[score_thresh[..., None].expand_as(anchors)].view(-1)
-        print(anchors.shape)
+        anchors = anchors[score_thresh[..., None].squeeze().expand_as(anchors)].view(-1, 1)
+        print(anchors.data)
 
         # Get batch numbers of the detections
         batch_num = score_thresh.view(batch, -1)
