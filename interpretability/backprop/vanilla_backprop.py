@@ -49,7 +49,7 @@ class VanillaBackprop:
         first_layer = list(self.model.layers._modules.items())[0][1][0].layers[0]
         first_layer.register_backward_hook(hook_function)
 
-    def generate_gradients(self, params, img_tf, annos, device, threshold=1.0, detections=None, class_flag=True, box_flag=True):
+    def generate_gradients(self, params, img_tf, device, detections, class_flag=True, box_flag=True):
         # Run model
         output = self.model(img_tf.to(device))
 
@@ -85,11 +85,11 @@ class VanillaBackprop:
         # Create ground_truth tensor
         anchors_new = torch.cat([torch.zeros_like(anchors), anchors], 1)
 
-        gt = torch.empty((annos.shape[0], 4), requires_grad=False)
-        gt[:, 2] = torch.from_numpy(annos.width.values) / stride
-        gt[:, 3] = torch.from_numpy(annos.height.values) / stride
-        gt[:, 0] = torch.from_numpy(annos.x_top_left.values).float() / stride + (gt[:, 2] / 2)
-        gt[:, 1] = torch.from_numpy(annos.y_top_left.values).float() / stride + (gt[:, 3] / 2)
+        gt = torch.empty((detections.shape[0], 4), requires_grad=False)
+        gt[:, 2] = torch.from_numpy(detections.width.values) / stride
+        gt[:, 3] = torch.from_numpy(detections.height.values) / stride
+        gt[:, 0] = torch.from_numpy(detections.x_top_left.values).float() / stride + (gt[:, 2] / 2)
+        gt[:, 1] = torch.from_numpy(detections.y_top_left.values).float() / stride + (gt[:, 3] / 2)
 
         # Find best anchor for each gt
         iou_gt_anchors = bbox_wh_ious(gt, anchors_new)
@@ -97,9 +97,6 @@ class VanillaBackprop:
 
         gradients_as_arr = []
         gradients_as_ten = []
-
-        if detections is None:
-            detections = annos
 
         for idx, entry in detections.iterrows():
             # Variable
@@ -111,15 +108,11 @@ class VanillaBackprop:
             grid_x = int(center_x * width / img_tf.size(2))
             grid_y = int(center_y * height / img_tf.size(3))
 
-            # Compute best anchor
-            cls_scores = torch.nn.functional.softmax(network_output[:, :, 5 + cls_index, grid_x + grid_y * height], 1)
-            cls_scores.mul_(network_output[:, :, 4, grid_x + grid_y * height])
-            value, anchor_max_idx = torch.max(cls_scores, 1)
-            print("Uit annos:", anchor_max_idx.item(), ", Berekend:", best_anchors[idx].item())
-            if value < threshold:
-                anchor_max_idx = best_anchors[idx]
-
-            print("Gekozen:", anchor_max_idx.item())
+            # Choose best anchor
+            if entry.status is 'FN':
+                anchor_max_idx = best_anchors[idx].item()
+            else:
+                anchor_max_idx = int(entry.anchor_box)
 
             # Reform output
             out = output.clone()
@@ -160,6 +153,5 @@ class VanillaBackprop:
             # [0] to get rid of the first channel (1,3,416,416)
             gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
-            print(gradients_as_arr[0][:, 0, 0])
 
         return gradients_as_arr

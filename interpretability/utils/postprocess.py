@@ -88,13 +88,11 @@ class GetBoundingBoxesAnchor(ln.data.transform.util.BaseTransform):
         # Mask select boxes > conf_thresh
         coords = new_network_output.transpose(2, 3)[..., 0:4]
         coords = coords[score_thresh[..., None].expand_as(coords)].view(-1, 4)
-        print(coords.data)
         scores = cls_max[score_thresh]
         idx = cls_max_idx[score_thresh]
 
         anchors = new_network_output.transpose(2, 3)[..., -1]  # [C, AnchorIdx]
         anchors = anchors[score_thresh[..., None].squeeze().expand_as(anchors)].view(-1, 1)
-        print(anchors.data)
 
         # Get batch numbers of the detections
         batch_num = score_thresh.view(batch, -1)
@@ -112,7 +110,7 @@ class NonMaxSuppression(ln.data.transform.util.BaseTransform):
         class_nms (Boolean, optional): Whether to perform nms per class; Default **True**
 
     Returns:
-        (Tensor [Boxes x 7]]): **[batch_num, x_center, y_center, width, height, confidence, class_id]** for every bounding box
+        (Tensor [Boxes x 8]]): **[batch_num, x_center, y_center, width, height, confidence, class_id, anchor_box]** for every bounding box
 
     Note:
         This post-processing function expects the input to be bounding boxes,

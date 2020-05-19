@@ -1,5 +1,6 @@
 import os
 from PIL import Image
+import torch
 from torchvision import transforms as tf
 import lightnet as ln
 import brambox as bb
@@ -29,12 +30,9 @@ def run_model(params, annos, args_anno, device):
     letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Preprocess
-    print(getImage(args_anno))
     img = Image.open(getImage(args_anno))
     img_tf = letterbox(img)
     annos = letterbox(annos)
-
-    img.save('data/iets2.jpg')
 
     img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
     img_tf.requires_grad = True
@@ -45,12 +43,12 @@ def run_model(params, annos, args_anno, device):
     return params, img_tf, annos
 
 
-def detect(params, args_anno, device):
+def detect(params, args_anno, device, conf_thresh=0.5):
     letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Postprocessing
     post_compose = ln.data.transform.Compose([
-        GetBoundingBoxesAnchor(len(params.class_label_map), params.network.anchors, 0.5),
+        GetBoundingBoxesAnchor(len(params.class_label_map), params.network.anchors, conf_thresh),
         NonMaxSuppression(0.5),
         TensorToBramboxAnchor(params.input_dimension, params.class_label_map),
     ])
@@ -63,12 +61,13 @@ def detect(params, args_anno, device):
 
     # Run network
     params.network.to(device)
-    out = params.network(img_tf.to(device))
+    with torch.no_grad():
+        out = params.network(img_tf.to(device))
 
     # Postprocess
     out = post_compose(out)
-    out = ln.data.transform.ReverseLetterbox.apply(out, network_size=params.input_dimension, image_size=img.size)
     detections = out.copy()
+    out = ln.data.transform.ReverseLetterbox.apply(out, network_size=params.input_dimension, image_size=img.size)
 
     # Draw
     out['label'] = out['class_label'] + ' [' + (out['confidence'] * 100).round(2).astype(str) + '%]'
