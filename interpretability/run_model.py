@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from interpretability.utils.postprocess import *
 
-__all__ = ['run_model', 'identify', 'getImage', 'detect']
+__all__ = ['transform', 'identify', 'getImage', 'detect']
 
 
 def getImage(xml_file):
@@ -26,7 +26,7 @@ def identify(xml_file):
     return f'{folder}/JPEGImages/{filename}'
 
 
-def run_model(params, annos, args_anno, device):
+def transform(params, annos, args_anno):
     letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Preprocess
@@ -37,10 +37,7 @@ def run_model(params, annos, args_anno, device):
     img_tf = tf.ToTensor()(img_tf).unsqueeze(0)
     img_tf.requires_grad = True
 
-    # Run network
-    params.network.to(device)
-
-    return params, img_tf, annos
+    return img_tf, annos
 
 
 def detect(params, args_anno, device, conf_thresh=0.5):
@@ -60,7 +57,7 @@ def detect(params, args_anno, device, conf_thresh=0.5):
     img_tf.requires_grad = True
 
     # Run network
-    params.network.to(device)
+    params.network.to(device).eval()
     with torch.no_grad():
         out = params.network(img_tf.to(device))
 
