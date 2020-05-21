@@ -14,14 +14,13 @@ __all__ = ['normalize', 'save_images', 'save_image', 'show_image']
 
 def normalize(gradient_images, grayscale_flag=False, threshold=99.999):
     """
-            Exports the original gradient images
+            Normalizes the images with a percentile threshold
 
         Args:
             gradient_images (np arr): Numpy arrays of the gradients with shape (3, 416, 416)
             grayscale_flag: flag to convert gradients to grayscale
             threshold: Threshold for removing outliers
         """
-    print("max:", np.array(gradient_images).max(), ", min:", np.array(gradient_images).min())
     if grayscale_flag:
         gradient_images = np.sum(np.abs(gradient_images), axis=1)
     all_grad = np.array(gradient_images)
@@ -34,7 +33,7 @@ def normalize(gradient_images, grayscale_flag=False, threshold=99.999):
         gradient /= grad_max
         gradient = np.clip(gradient, 0, 1)
         gradient_images_list.append(gradient)
-        print(gradient.max(), gradient.min())
+        #print(gradient.max(), gradient.min())
     return gradient_images_list
 
 

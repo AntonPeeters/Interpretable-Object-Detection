@@ -40,7 +40,7 @@ def transform(params, annos, args_anno):
     return img_tf, annos
 
 
-def detect(params, args_anno, device, conf_thresh=0.5):
+def run_detect(params, args_anno, device, conf_thresh=0.5):
     letterbox = ln.data.transform.Letterbox(dimension=params.input_dimension)
 
     # Postprocessing
