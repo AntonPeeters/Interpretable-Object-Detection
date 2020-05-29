@@ -96,7 +96,6 @@ class VanillaBackprop:
         _, best_anchors = iou_gt_anchors.max(1)
 
         gradients_as_arr = []
-        gradients_as_ten = []
 
         for idx, entry in detections.iterrows():
             # Variable
@@ -151,7 +150,6 @@ class VanillaBackprop:
 
             # Convert Pytorch variable to numpy array
             # [0] to get rid of the first channel (1,3,416,416)
-            gradients_as_ten.append(self.gradients[0])
             gradients_as_arr.append(self.gradients.data.cpu().numpy()[0])
 
         return gradients_as_arr

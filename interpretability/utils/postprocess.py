@@ -25,6 +25,9 @@ class GetBoundingBoxesAnchor(ln.data.transform.util.BaseTransform):
 
     Note:
         The output tensor uses relative values for its coordinates.
+
+    Warning:
+        Some of the class_labels return NaN
     """
     def __init__(self, num_classes, anchors, conf_thresh):
         self.num_classes = num_classes

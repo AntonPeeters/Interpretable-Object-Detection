@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from PIL import Image
 import torch
 from torchvision import transforms as tf
@@ -8,7 +9,7 @@ import xml.etree.ElementTree as ET
 
 from interpretability.utils.postprocess import *
 
-__all__ = ['transform', 'identify', 'getImage', 'detect']
+__all__ = ['transform', 'identify', 'getImage', 'run_detect']
 
 
 def getImage(xml_file):
@@ -67,6 +68,7 @@ def run_detect(params, args_anno, device, conf_thresh=0.5):
     out = ln.data.transform.ReverseLetterbox.apply(out, network_size=params.input_dimension, image_size=img.size)
 
     # Draw
+    out['class_label'].fillna('NaN', inplace=True)
     out['label'] = out['class_label'] + ' [' + (out['confidence'] * 100).round(2).astype(str) + '%]'
     img = bb.util.draw_boxes(img, out)
 
