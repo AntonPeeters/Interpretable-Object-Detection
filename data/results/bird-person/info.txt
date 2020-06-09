@@ -1,0 +1,4 @@
+threshold = 99.9
+
+box = false
+class = true

@@ -1,0 +1,5 @@
+shadows: 32
+constrast: -8
+
+threshold = 99.99
+box_flag, class_flag = True

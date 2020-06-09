@@ -1,0 +1,2 @@
+threshold = 99.9
+box_flag, class_flag = True
