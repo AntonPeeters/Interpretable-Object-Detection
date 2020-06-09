@@ -80,7 +80,6 @@ class GuidedBackprop:
         # Loop through layers, hook up ReLUs
         for mod in self.model.modules():
             if isinstance(mod, LeakyReLU):
-                print(mod)
                 mod = LeakyReLU(inplace=False, negative_slope=0.1)
                 mod.register_backward_hook(relu_backward_hook_function)
                 mod.register_forward_hook(relu_forward_hook_function)

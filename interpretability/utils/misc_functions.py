@@ -9,10 +9,10 @@ import numpy as np
 from PIL import Image
 import matplotlib.cm as mpl_color_map
 
-__all__ = ['normalize', 'save_images', 'save_image', 'show_image']
+__all__ = ['normalize', 'save_images', 'save_image', 'show_image', 'convert_to_grayscale']
 
 
-def normalize(gradient_images, grayscale_flag=False, threshold=99.999):
+def normalize(gradient_images, grayscale_flag=True, threshold=99.99):
     """
             Normalizes the images with a percentile threshold
 
@@ -33,8 +33,24 @@ def normalize(gradient_images, grayscale_flag=False, threshold=99.999):
         gradient /= grad_max
         gradient = np.clip(gradient, 0, 1)
         gradient_images_list.append(gradient)
-        #print(gradient.max(), gradient.min())
+        print(gradient.max(), gradient.min())
     return gradient_images_list
+
+
+def convert_to_grayscale(im_as_arr):
+    """
+        Converts 3d image to grayscale
+    Args:
+        im_as_arr (numpy arr): RGB image with shape (D,W,H)
+    returns:
+        grayscale_im (numpy_arr): Grayscale image with shape (1,W,D)
+    """
+    grayscale_im = np.sum(np.abs(im_as_arr), axis=0)
+    im_max = np.percentile(grayscale_im, 99)
+    im_min = np.min(grayscale_im)
+    grayscale_im = (np.clip((grayscale_im - im_min) / (im_max - im_min), 0, 1))
+    grayscale_im = np.expand_dims(grayscale_im, axis=0)
+    return grayscale_im
 
 
 def save_images(gradient_images, file_name):
